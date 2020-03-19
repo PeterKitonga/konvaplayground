@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+    <title>Konva</title>
+</head>
+<body id="canvas-body">
+    <div class="container">
+        <div class="row my-3">
+            <div class="col">
+                <div class="shadow-lg p-5 mb-5 bg-white rounded">                    
+                    <div class="d-flex flex-row justify-content-between">
+                        <div class="p-2"><a class="btn btn-outline-primary btn-lg" href="/stageclickevent.html" role="button"><< Back</a></div>
+                        <div class="p-2"><h1 class="display-4">Click to draw</h1> </div>
+                        <div class="p-2"><a class="btn btn-outline-success btn-lg" href="/dragtodraw.html" role="button">Next >></a></div>                        
+                    </div>
+                    <hr>         
+                    <div class="jumbotron">
+                        <p class="lead" id="coordinates-display">Clicked coordinates: {x: 0, y: 0}</p>
+                        <hr class="my-4">
+                        <div id="container" style="border: 1px solid black;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/konva@4.0.0/konva.min.js"></script>
+    <script>
+        // write the coords to the UI and draw the shape
+        function writeCoordinates(coords) {
+            var element = document.getElementById('coordinates-display');
+            element.innerText = coords;
+        }
+        
+        // set the coordinate click count to zero
+        var coord_click_count = 0;
+        
+        // define the width and height of the stage/canvas
+        var width = 960;
+        var height = 300;
+        
+        // first we need to create a stage
+        var stage =  new Konva.Stage({
+            container: 'container', // id of container
+            width: width,
+            height: height
+        });
+        
+        // then create layer
+        var layer = new Konva.Layer();
+        
+        // add the layer to the stage
+        stage.add(layer);
+        
+        // define the arrow properties object
+        var arrow_properties = {
+            points: [],
+            fill: 'white',
+            stroke: 'black',
+            strokeWidth: 2,
+            shadowColor: 'black',
+            shadowBlur: 10,
+            shadowOffset: { x: 10, y: 10 },
+            shadowOpacity: 0.5,
+            name: 'arrow'
+        };
+        
+        // listen for on click event on the stage
+        stage.on('click', function(event) {
+            // increment the coordinate click count
+            coord_click_count++;
+            
+            // get the pointer position
+            var pointer_position = stage.getPointerPosition();
+            
+            // create circle shape on the clicked coordnates
+            var circle = new Konva.Circle({
+                x: pointer_position.x,
+                y: pointer_position.y,
+                fill: 'white',
+                radius: 2,
+                stroke: 'black',
+                strokeWidth: 1
+            });
+            
+            // add the shape to the layer
+            layer.add(circle);
+            
+            // draw the circle
+            circle.draw();
+            
+            if (coord_click_count === 2) {
+                // push the second set of coordinates to the points array
+                var points = [pointer_position.x, pointer_position.y];
+                points.forEach(function (item) {
+                    arrow_properties.points.push(item);
+                });
+
+                // create arrow shape
+                var arrow = new Konva.Arrow(arrow_properties);
+                
+                // add the shape to the layer
+                layer.add(arrow);
+
+                arrow.id('arrow-' + Math.floor(Math.random() * Math.floor(1000)));
+                
+                // draw the arrow
+                arrow.draw();
+                
+                // reset the coordinate click count
+                coord_click_count = 0;
+            } else {
+                // reset the arrow points to pass points for the next arrow to be drawn
+                arrow_properties.points.splice(0, 4);
+                
+                // push the first set of coordinates to the points array
+                var points = [pointer_position.x, pointer_position.y];
+                points.forEach(function (item) {
+                    arrow_properties.points.push(item);
+                });
+            }
+            
+            writeCoordinates('Clicked coordinates: ' + JSON.stringify(stage.getPointerPosition()));
+        });
+
+        // stage.on('mouseover', 'Arrow', function (event) {
+        //     var id = event.target.id();
+        //     console.log(id);
+        //     var selected = stage.findOne('#' + id);
+        //     console.log(selected);
+        // });
+    </script>
+</body>
+</html>
